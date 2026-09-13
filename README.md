@@ -67,21 +67,24 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/a
 This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
 
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
 ---
 
-## Crear el Dockerfile
+## Create the Dockerfile
 
 
-En la raíz del proyecto (junto a `package.json`) se creó el archivo `Dockerfile` con un build en dos etapas:
+In the project, the `Dockerfile` file was created with a two-stage build:
 
-1. **Build** con Node.js: instala dependencias y genera la carpeta `build`.
-2. **Serve** con nginx: sirve los archivos estáticos en el puerto 80.
+1. **Build** with Node.js: installs dependencies and generates the `build` folder.
+2. **Serve** with nginx: serves the static files on port 80.
 
-### Contenido del `Dockerfile`
+### Contents of `Dockerfile`
 
 ```dockerfile
-# Etapa 1: construir la app React
+# Stage 1: build the React app
 FROM node:18-alpine AS build
 WORKDIR /app
 COPY package*.json ./
@@ -89,7 +92,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Etapa 2: servir los archivos con nginx
+# Stage 2: serve the files with nginx
 FROM nginx:alpine
 COPY --from=build /app/build /usr/share/nginx/html
 EXPOSE 80
@@ -98,13 +101,13 @@ CMD ["nginx", "-g", "daemon off;"]
 
 ---
 
-##  Crear el .dockerignore
+##  Create the .dockerignore
 
-### Qué se hizo
+### What was done
 
-Se creó `.dockerignore` para no copiar archivos innecesarios a la imagen (más rápido y limpio).
+`.dockerignore` was created to avoid copying unnecessary files into the image (faster and cleaner).
 
-### Contenido
+### Contents
 
 ```text
 node_modules
@@ -114,37 +117,37 @@ build
 ```
 
 
-## Configurar secretos en GitHub
+## Configure secrets in GitHub
 
-### Qué se hizo
+### What was done
 
-En el repositorio de GitHub:
+In the GitHub repository:
 
 1. **Settings** → **Secrets and variables** → **Actions**
 2. **New repository secret**
-3. Se crearon estos dos secretos:
+3. These two secrets were created:
 
-| Nombre del secreto     | Valor                                      |
+| Secret name     | Value                                      |
 |------------------------|--------------------------------------------|
-| `DOCKERHUB_USERNAME`   | Usuario de Docker Hub (no el email)        |
-| `DOCKERHUB_TOKEN`      | Access Token creado en el paso anterior    |
+| `DOCKERHUB_USERNAME`   | Docker Hub username (not the email)        |
+| `DOCKERHUB_TOKEN`      | Access Token created  |
 
 ![](https://cdn.phototourl.com/free/2026-09-07-ffb1e7d3-3372-44b9-8e3a-2f6d61b5c8c0.png)
 
 
 ---
 
-## Crear la GitHub Action
+## Create the GitHub Action
 
-### Qué se hizo
+### What was done
 
-Se creó el archivo:
+The following file was created:
 
 ```text
 .github/workflows/docker-publish.yml
 ```
 
-### Contenido del workflow
+### Workflow contents
 
 ```yaml
 name: Build and Push Docker Image
@@ -178,44 +181,44 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/rick-morty:latest
 ```
 
-### Pasos del workflow 
+### Workflow steps
 
-| Paso | Acción | Qué hace |
+| Step | Action | What it does |
 |------|--------|----------|
-| 1 | Checkout | Descarga el código del repositorio |
-| 2 | Set up Docker Buildx | Prepara Docker para construir imágenes |
-| 3 | Login to Docker Hub | Inicia sesión con los secretos de GitHub |
-| 4 | Build and push | Construye la imagen y la sube a Docker Hub |
+| 1 | Checkout | Downloads the repository code |
+| 2 | Set up Docker Buildx | Prepares Docker to build images |
+| 3 | Login to Docker Hub | Logs in using the GitHub secrets |
+| 4 | Build and push | Builds the image and pushes it to Docker Hub |
 
-### Nota sobre indentación YAML
+### Note on YAML indentation
 
-`name`, `on` y `jobs` deben ir al **mismo nivel** (sin espacios extra al inicio). Si `on` o `jobs` quedan indentados debajo de `name`, GitHub marca error de sintaxis en la línea 2.
+`name`, `on`, and `jobs` must be at the **same level** (no extra leading spaces). If `on` or `jobs` end up indented under `name`, GitHub flags a syntax error on line 2.
 
 ---
 
-##  Verificar el workflow en Actions
+##  Verify the workflow in Actions
 
-### Qué se hizo
+### What was done
 
-1. Entrar al repositorio en GitHub
-2. Pestaña **Actions**
-3. Abrir el workflow **Build and Push Docker Image**
-4. Confirmar que todos los pasos quedaron en verde
+1. Go to the repository on GitHub
+2. **Actions** tab
+3. Open the **Build and Push Docker Image** workflow
+4. Confirm that all steps show green
 
 ![](https://cdn.phototourl.com/free/2026-09-07-54d3827e-3563-4b24-9f09-a1f67405542d.png)
 
 ![](https://cdn.phototourl.com/free/2026-09-07-e04cc5fd-7344-46f3-9728-b3d63ccf2d8a.png)
 ---
 
-##  Verificar la imagen en Docker Hub
+##  Verify the image on Docker Hub
 
-### Qué se hizo
+### What was done
 
-1. Entrar a [https://hub.docker.com](https://hub.docker.com)
-2. Ir a **Repositories**
-3. Confirmar el repositorio `rick-morty` con el tag `latest`
+1. Go to [https://hub.docker.com](https://hub.docker.com)
+2. Go to **Repositories**
+3. Confirm the `rick-morty` repository with the `latest` tag
 
-Imagen publicada (ejemplo):
+Published image (example):
 
 ```text
 vikyria/rick-morty:latest
@@ -227,29 +230,24 @@ vikyria/rick-morty:latest
 
 
 
-## Resumen de archivos creados
+## Summary of files created
 
-| Archivo | Propósito |
+| File | Purpose |
 |---------|-----------|
-| `Dockerfile` | Define cómo construir la imagen |
-| `.dockerignore` | Excluye archivos del contexto de build |
-| `.github/workflows/docker-publish.yml` | Automatiza build + push a Docker Hub |
+| `Dockerfile` | Defines how to build the image |
+| `.dockerignore` | Excludes files from the build context |
+| `.github/workflows/docker-publish.yml` | Automates build + push to Docker Hub |
 
-## Checklist final
+## Final checklist
 
-- Dockerfile creado
-- .dockerignore creado
-- Access Token en Docker Hub
-- Secretos `DOCKERHUB_USERNAME` y `DOCKERHUB_TOKEN` en GitHub
-- Workflow `docker-publish.yml` creado
-- Push a `main` realizado
-- Actions en verde
-- Imagen visible en Docker Hub
-- Contenedor corriendo y app visible en el navegador
+- Dockerfile created
+- .dockerignore created
+- Access Token on Docker Hub
+- `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets in GitHub
+- `docker-publish.yml` workflow created
+- Push to `main` done
+- Actions green
+- Image visible on Docker Hub
+- Container running and app visible in the browser
 
 ---
-
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
